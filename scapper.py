@@ -1,14 +1,15 @@
 import asyncio
-import numpy as np
 import os
 import cv2
-import shutil
 import time
-import requests
-import pyzbar.pyzbar as pyzbar
-from pyppeteer import launch
 import signal
 import sys
+import logging
+from pyppeteer import launch
+import pyzbar.pyzbar as pyzbar
+from multiprocessing import Process
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def delete_img(destination_path):
     if os.path.exists(destination_path):
@@ -32,11 +33,9 @@ def crop_qr_code(screenshot, destination_path_screenshot):
             cropped_img = img[y:y+h, x:x+w]
             qr_code_path = screenshot.replace("screenshot", "qr_code")
             cv2.imwrite(qr_code_path, cropped_img)
-            print(f"QR code saved as {qr_code_path}")
+            logging.info(f"QR code saved as {qr_code_path}")
     except Exception as e:
-        print(f"CATCH ERROR | CROP QR CODE: {e}")
-
-
+        logging.error(f"CATCH ERROR | CROP QR CODE: {e}")
 
 def run_scrapper():
     url = "https://web.whatsapp.com"
@@ -47,19 +46,31 @@ def run_scrapper():
     destination_path_qr_code = os.path.join(static_folder, qr_code)
 
     while True:
-        delete_img(destination_path_screenshot)
-        time.sleep(1)
-        delete_img(destination_path_qr_code)
-        time.sleep(1)
-        asyncio.run(take_screenshot(url, destination_path_screenshot))
-        time.sleep(1)
-        crop_qr_code(destination_path_screenshot, destination_path_screenshot)
-        time.sleep(1)    
-        delete_img(destination_path_screenshot)
-        time.sleep(30)
+        try:
+            delete_img(destination_path_screenshot)
+            time.sleep(1)
+            #delete_img(destination_path_qr_code)
+            #time.sleep(1)
+
+            logging.info("Taking screenshot...")
+            asyncio.run(take_screenshot(url, destination_path_screenshot))
+            logging.info("Screenshot taken.")
+            time.sleep(1)
+            
+            delete_img(destination_path_qr_code)
+            logging.info("Cropping QR code...")
+            crop_qr_code(destination_path_screenshot, destination_path_screenshot)
+            logging.info("QR code cropped.")
+            time.sleep(1)
+
+            delete_img(destination_path_screenshot)
+            time.sleep(20)  
+        except Exception as e:
+            logging.error(f"Error in scrapper process: {e}")
+            time.sleep(10)
 
 def signal_handler(sig, frame):
-    print("Terminating scrapper...")
+    logging.info("Terminating scrapper...")
     sys.exit(0)
 
 if __name__ == '__main__':

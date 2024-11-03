@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request
-from apscheduler.schedulers.background import BackgroundScheduler
+from multiprocessing import Process
 from models import db, User, VisitorHistory
 from werkzeug.security import generate_password_hash
 from flask_socketio import SocketIO
