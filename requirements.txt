@@ -1,0 +1,8 @@
+opencv-python
+requests
+pyzbar
+numpy
+scikit-image
+random-user-agent
+asyncio
+pyppeteer
