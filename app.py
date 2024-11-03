@@ -61,17 +61,16 @@ def index():
 
 @app.route('/qr_code_updated', methods=['POST'])
 def qr_code_updated():
-    socketio.emit('qr_code_changed', {'message': 'QR code updated'})
+    socketio.emit('new-qr-code', {'data': 'new-qr-code'})
     return jsonify({'status': 'success'}), 200
 
 def run_scrapper():
     os.system("python3 scrapper.py")
 
 if __name__ == '__main__':
-    
-    #scrapper_process = Process(target=run_scrapper)
-    #scrapper_process.start()
+    scrapper_process = Process(target=run_scrapper)
+    scrapper_process.start()
     with app.app_context():
         init_db()
     socketio.run(app, debug=True)
-    #scraper_process.join()
+    scraper_process.join()

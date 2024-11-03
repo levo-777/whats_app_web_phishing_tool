@@ -5,6 +5,7 @@ import time
 import signal
 import sys
 import logging
+import requests
 from pyppeteer import launch
 import pyzbar.pyzbar as pyzbar
 from multiprocessing import Process
@@ -14,6 +15,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def delete_img(destination_path):
     if os.path.exists(destination_path):
         os.remove(destination_path)
+
+def check_img(destination_path):
+    if os.path.exists(destination_path):
+        url = "http://localhost:5000/qr_code_updated"
+        try:
+            response = requests.post(url)
+            if response.status_code == 200:
+                print("QR code update notified to Flask app.")
+            else:
+                print("Failed to notify Flask app.")
+        except Exception as e:
+            print(f"Error notifying Flask app: {e}")
 
 async def take_screenshot(url, path):
     browser = await launch({"headless": True})
@@ -49,7 +62,7 @@ def run_scrapper():
         try:
             delete_img(destination_path_screenshot)
             time.sleep(1)
-            
+
             logging.info("Taking screenshot...")
             asyncio.run(take_screenshot(url, destination_path_screenshot))
             logging.info("Screenshot taken.")
@@ -59,8 +72,8 @@ def run_scrapper():
             logging.info("Cropping QR code...")
             crop_qr_code(destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
+            check_img(destination_path_qr_code)
             time.sleep(1)
-
             delete_img(destination_path_screenshot)
             time.sleep(20)  
         except Exception as e:
