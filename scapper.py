@@ -49,9 +49,7 @@ def run_scrapper():
         try:
             delete_img(destination_path_screenshot)
             time.sleep(1)
-            #delete_img(destination_path_qr_code)
-            #time.sleep(1)
-
+            
             logging.info("Taking screenshot...")
             asyncio.run(take_screenshot(url, destination_path_screenshot))
             logging.info("Screenshot taken.")
