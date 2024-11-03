@@ -68,16 +68,10 @@ def run_scrapper():
     os.system("python3 scrapper.py")
 
 if __name__ == '__main__':
+    
+    #scrapper_process = Process(target=run_scrapper)
+    #scrapper_process.start()
     with app.app_context():
         init_db()
-
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=run_scrapper, trigger="interval", seconds=20)
-    scheduler.start()
-
-    try:
-        socketio.run(app, debug=True)
-    except (KeyboardInterrupt, SystemExit):
-        pass
-    finally:
-        scheduler.shutdown()
+    socketio.run(app, debug=True)
+    #scraper_process.join()
