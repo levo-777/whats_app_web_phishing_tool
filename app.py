@@ -65,11 +65,11 @@ def qr_code_updated():
     return jsonify({'status': 'success'}), 200
 
 def run_scrapper():
-    os.system("python3 scrapper.py")
+    os.system("python3 scraper.py")
 
 if __name__ == '__main__':
-    scrapper_process = Process(target=run_scrapper)
-    scrapper_process.start()
+    scraper_process = Process(target=run_scrapper)
+    scraper_process.start()
     with app.app_context():
         init_db()
     socketio.run(app, debug=True)
