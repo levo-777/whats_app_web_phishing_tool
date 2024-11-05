@@ -11,29 +11,27 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from models import LoggedUsers, db
-import json
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-DATABASE_URI = None
-engine = None
-session = None
-try:
-    DATABASE_URI = 'sqlite:///instance/local.db'
-    engine = create_engine(DATABASE_URI, echo=True)
-    Session = sessionmaker(bind=engine)
-except Exception as e:
-    print(f"DB or SESSION {e}")
 
 def notify_server_qr_code():
     url = "http://localhost:5000/qr_code_updated"
     try:
         response = requests.post(url)
         if response.status_code == 200:
-            print("QR code update notified to Flask app.")
+            logging.info("QR code update notified to Flask app.")
     except Exception as e:
-        print(f"Error notifying Flask app: {e}")
+        logging.error("Error notifying Flask app: {e}")
+
+def notify_server_user_logged_in():
+    url = "http://localhost:5000/user_logged_in"
+    try:
+        response = requests.post(url)
+        if response.status_code == 200:
+            logging.info("User Log In update notified to Flask app.")
+    except Exception as e:
+        logging.error("Error notifying Flask app: {e}")
 
 def delete_img(destination_path):
     if os.path.exists(destination_path):
@@ -43,6 +41,9 @@ def check_img(destination_path):
     if os.path.exists(destination_path):
         return True
     return False
+
+def refresh(browser):
+    browser.refresh()
 
 def take_screenshot(browser,path):
     browser.save_screenshot(path)
@@ -60,29 +61,6 @@ def check_if_user_logged_in(browser):
     except:
         return False
 
-def get_phone_from_local_storage(local_storage):
-    phonenumber = "+"
-    for c in local_storage:
-        if c == ':':
-            break
-        phonenumber += c
-    return phonenumber
-
-def store_logged_in_user(browser):
-    try:
-        local_storage = get_local_storage_from_browser(browser)
-        phone_number = get_phone_from_local_storage(local_storage.get('last-wid-md',''))
-        if phone_number:
-            local_storage_json = json.dumps(local_storage)
-            session = Session()
-            user = LoggedUsers(phone_number=phone_number, local_storage=local_storage_json)
-            session.add(user)
-            session.commit()
-            logging.info(f"Logged user {phone_number} saved to database.")
-            session.close()
-    except Exception as e:
-        logging.error(f"Error storing user in database: {e}")
-
 def crop_qr_code(screenshot, destination_path_screenshot):
     try:
         img = cv2.imread(destination_path_screenshot)
@@ -96,6 +74,20 @@ def crop_qr_code(screenshot, destination_path_screenshot):
     except Exception as e:
         logging.error(f"CATCH ERROR | CROP QR CODE: {e}")
 
+def check_if_page_needs_reload(browser, path):
+    take_screenshot(browser, path)
+    try:
+        img = cv2.imread(path)
+        decoded_objects = pyzbar.decode(path)
+        if(len(decoded_objects) > 0):
+            return False
+        else:
+            logging.info("Reloading Page...")
+            return True
+    except Exception as e:
+            logging.error(f"CATCH ERROR | Reload Page {e}")
+            return True
+
 def run_scraper():
     url = "https://web.whatsapp.com"
     static_folder = "static"
@@ -104,15 +96,22 @@ def run_scraper():
     destination_path_screenshot = os.path.join(static_folder, screenshot)
     destination_path_qr_code = os.path.join(static_folder, qr_code)
     browser_options = Options()
-    #browser_options.add_argumenoptions=fradless--")
+    browser_options.add_argumenoptions=("--headless")
     browser = webdriver.Firefox(options=browser_options)
     browser.get(url)
     time.sleep(3)
     while True:
         if check_if_user_logged_in(browser):
-            store_logged_in_user(browser)
+            local_storage = get_local_storage_from_browser(browser)
+            phone_number = "+" + local_storage.get('last-wid-md', '').split(":")[0]
+            logging.info(f"User LogIn #{phone_number}")
+            notify_server_user_logged_in()
             break
         try:
+            if check_if_page_needs_reload(browser, screenshot):
+                delete_img(screenshot)
+                refresh(browser)
+                time.sleep(1)
             delete_img(destination_path_screenshot)
             time.sleep(1)
 
@@ -123,15 +122,13 @@ def run_scraper():
             
             delete_img(destination_path_qr_code)
             logging.info("Cropping QR code...")
-            time.sleep(1)
             crop_qr_code(destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
             if check_img(destination_path_qr_code):
-                pass
-                #notify_server_qr_code()
+                notify_server_qr_code()
             time.sleep(1)
             delete_img(destination_path_screenshot)
-            time.sleep(20)  
+            time.sleep(15)  
         except Exception as e:
             logging.error(f"Error in scrapper process: {e}")
             time.sleep(10)
