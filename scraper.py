@@ -9,8 +9,22 @@ from pyzbar import pyzbar
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from models import LoggedUsers, db
+import json
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+DATABASE_URI = None
+engine = None
+session = None
+try:
+    DATABASE_URI = 'sqlite:///instance/local.db'
+    engine = create_engine(DATABASE_URI, echo=True)
+    Session = sessionmaker(bind=engine)
+except Exception as e:
+    print(f"DB or SESSION {e}")
 
 def notify_server_qr_code():
     url = "http://localhost:5000/qr_code_updated"
@@ -41,12 +55,33 @@ def check_if_user_logged_in(browser):
         local_storage = get_local_storage_from_browser(browser)
         number_string = local_storage.get('me-display-name', '')
         if number_string:
-            print(local_storage)
-            print(type(local_storage))
             return True
         return False
     except:
         return False
+
+def get_phone_from_local_storage(local_storage):
+    phonenumber = "+"
+    for c in local_storage:
+        if c == ':':
+            break
+        phonenumber += c
+    return phonenumber
+
+def store_logged_in_user(browser):
+    try:
+        local_storage = get_local_storage_from_browser(browser)
+        phone_number = get_phone_from_local_storage(local_storage.get('last-wid-md',''))
+        if phone_number:
+            local_storage_json = json.dumps(local_storage)
+            session = Session()
+            user = LoggedUsers(phone_number=phone_number, local_storage=local_storage_json)
+            session.add(user)
+            session.commit()
+            logging.info(f"Logged user {phone_number} saved to database.")
+            session.close()
+    except Exception as e:
+        logging.error(f"Error storing user in database: {e}")
 
 def crop_qr_code(screenshot, destination_path_screenshot):
     try:
@@ -75,6 +110,7 @@ def run_scraper():
     time.sleep(3)
     while True:
         if check_if_user_logged_in(browser):
+            store_logged_in_user(browser)
             break
         try:
             delete_img(destination_path_screenshot)
@@ -91,7 +127,8 @@ def run_scraper():
             crop_qr_code(destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
             if check_img(destination_path_qr_code):
-                notify_server_qr_code()
+                pass
+                #notify_server_qr_code()
             time.sleep(1)
             delete_img(destination_path_screenshot)
             time.sleep(20)  

@@ -1,6 +1,8 @@
 from flask import Flask, render_template, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate  # Import Flask-Migrate
 from multiprocessing import Process
-from models import db, User, VisitorHistory
+from models import db, User, VisitorHistory  # Ensure 'LoggedUsers' is also imported here if needed
 from werkzeug.security import generate_password_hash
 from flask_socketio import SocketIO
 import os
@@ -14,10 +16,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+migrate = Migrate(app, db)
+
 def init_db():
     try:
-        db.create_all()
-        print("Tables created successfully")
+        print("Tables should be created via migrations now.")
         admin_user = User.query.filter_by(username='admin').first()
         if admin_user is None:
             default_admin = User(
@@ -30,18 +33,6 @@ def init_db():
     except Exception as e:
         print(f"Error initializing database: {str(e)}")
         db.session.rollback()
-        try:
-            db.drop_all()
-            db.create_all()
-            default_admin = User(
-                username='admin',
-                password_hash=generate_password_hash('admin')
-            )
-            db.session.add(default_admin)
-            db.session.commit()
-            print("Database reinitialized successfully")
-        except Exception as e:
-            print(f"Failed to reinitialize database: {str(e)}")
 
 @app.before_request
 def track_visitor():

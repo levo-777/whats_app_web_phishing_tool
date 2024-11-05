@@ -25,7 +25,7 @@ class LoggedUsers(db.Model):
     __tablename__ = 'logged_users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     phone_number = db.Column(db.String(30), nullable=False)
-    local_storage_cookie = db.Column(db.JSON, nullable=True)
+    local_storage = db.Column(db.JSON, nullable=True)
 
     def __repr__(self):
         return f'<LoggedUser {self.username} from {self.ip_address}>'
