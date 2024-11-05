@@ -34,6 +34,17 @@ def check_img(destination_path):
 def take_screenshot(browser,path):
     browser.save_screenshot(path)
 
+def check_if_user_logged_in(browser):
+    try:
+        local_storage = browser.execute_script("return localStorage")
+        print(local_storage)
+        number_string = local_storage.get('me-display-name', '')
+        if number_string:
+            return True
+        return False
+    except:
+        return False
+
 def crop_qr_code(screenshot, destination_path_screenshot):
     try:
         img = cv2.imread(destination_path_screenshot)
@@ -60,6 +71,8 @@ def run_scraper():
     browser.get(url)
     time.sleep(3)
     while True:
+        if check_if_user_logged_in(browser):
+            break
         try:
             delete_img(destination_path_screenshot)
             time.sleep(1)
