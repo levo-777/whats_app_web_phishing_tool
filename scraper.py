@@ -34,12 +34,16 @@ def check_img(destination_path):
 def take_screenshot(browser,path):
     browser.save_screenshot(path)
 
+def get_local_storage_from_browser(browser):
+    return browser.execute_script("return localStorage")
+
 def check_if_user_logged_in(browser):
     try:
-        local_storage = browser.execute_script("return localStorage")
-        print(local_storage)
+        local_storage = get_local_storage_from_browser(browser)
         number_string = local_storage.get('me-display-name', '')
         if number_string:
+            print(local_storage)
+            print(type(local_storage))
             return True
         return False
     except:
