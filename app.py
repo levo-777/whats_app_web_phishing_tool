@@ -72,5 +72,5 @@ if __name__ == '__main__':
     scraper_process.start()
     with app.app_context():
         init_db()
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, use_reloader=False)
     scraper_process.join()

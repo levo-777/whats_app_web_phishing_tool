@@ -12,7 +12,6 @@ from selenium.webdriver.firefox.options import Options
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Optionally implement this later with python-socketio lib, sockit.send("new-qr-code", data: {"new-qr-code"})
 def notify_server_qr_code():
     url = "http://localhost:5000/qr_code_updated"
     try:
@@ -92,8 +91,7 @@ def run_scraper():
             crop_qr_code(destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
             if check_img(destination_path_qr_code):
-                pass
-                #notify_server_qr_code()
+                notify_server_qr_code()
             time.sleep(1)
             delete_img(destination_path_screenshot)
             time.sleep(20)  
