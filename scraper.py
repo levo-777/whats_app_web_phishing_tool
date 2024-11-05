@@ -1,16 +1,26 @@
-import asyncio
 import os
-import cv2
 import time
+import cv2
+import requests
+import logging
 import signal
 import sys
-import logging
-import requests
-from pyppeteer import launch
-import pyzbar.pyzbar as pyzbar
-from multiprocessing import Process
+from pyzbar import pyzbar
+from random import randint
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Optionally implement this later with python-socketio lib, sockit.send("new-qr-code", data: {"new-qr-code"})
+def notify_server_qr_code():
+    url = "http://localhost:5000/qr_code_updated"
+    try:
+        response = requests.post(url)
+        if response.status_code == 200:
+            print("QR code update notified to Flask app.")
+    except Exception as e:
+        print(f"Error notifying Flask app: {e}")
 
 def delete_img(destination_path):
     if os.path.exists(destination_path):
@@ -18,24 +28,11 @@ def delete_img(destination_path):
 
 def check_img(destination_path):
     if os.path.exists(destination_path):
-        url = "http://localhost:5000/qr_code_updated"
-        try:
-            response = requests.post(url)
-            if response.status_code == 200:
-                print("QR code update notified to Flask app.")
-            else:
-                print("Failed to notify Flask app.")
-        except Exception as e:
-            print(f"Error notifying Flask app: {e}")
+        return True
+    return False
 
-async def take_screenshot(url, path):
-    browser = await launch({"headless": True})
-    page = await browser.newPage()
-    await page.setUserAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0")
-    await page.goto(url)
-    await asyncio.sleep(5)
-    await page.screenshot({'path': path, 'fullPage': True})
-    await browser.close()
+def take_screenshot(browser,path):
+    browser.save_screenshot(path)
 
 def crop_qr_code(screenshot, destination_path_screenshot):
     try:
@@ -50,29 +47,36 @@ def crop_qr_code(screenshot, destination_path_screenshot):
     except Exception as e:
         logging.error(f"CATCH ERROR | CROP QR CODE: {e}")
 
-def run_scrapper():
+def run_scraper():
     url = "https://web.whatsapp.com"
     static_folder = "static"
     screenshot = "screenshot.png"
     qr_code = "qr_code.png"
     destination_path_screenshot = os.path.join(static_folder, screenshot)
     destination_path_qr_code = os.path.join(static_folder, qr_code)
-
+    browser_options = Options()
+    #browser_options.add_argumenoptions=fradless--")
+    browser = webdriver.Firefox(options=browser_options)
+    browser.get(url)
+    time.sleep(3)
     while True:
         try:
             delete_img(destination_path_screenshot)
             time.sleep(1)
 
             logging.info("Taking screenshot...")
-            asyncio.run(take_screenshot(url, destination_path_screenshot))
+            take_screenshot(browser,destination_path_screenshot)
             logging.info("Screenshot taken.")
             time.sleep(1)
             
             delete_img(destination_path_qr_code)
             logging.info("Cropping QR code...")
+            time.sleep(1)
             crop_qr_code(destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
-            check_img(destination_path_qr_code)
+            if check_img(destination_path_qr_code):
+                pass
+                #notify_server_qr_code()
             time.sleep(1)
             delete_img(destination_path_screenshot)
             time.sleep(20)  
@@ -80,10 +84,5 @@ def run_scrapper():
             logging.error(f"Error in scrapper process: {e}")
             time.sleep(10)
 
-def signal_handler(sig, frame):
-    logging.info("Terminating scrapper...")
-    sys.exit(0)
-
-if __name__ == '__main__':
-    signal.signal(signal.SIGINT, signal_handler)
-    run_scrapper()
+if __name__ == "__main__":
+    run_scraper()
