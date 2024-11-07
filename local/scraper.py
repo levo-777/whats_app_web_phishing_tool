@@ -61,7 +61,7 @@ def check_if_user_logged_in(browser):
     except:
         return False
 
-def crop_qr_code(screenshot, destination_path_screenshot):
+def crop_qr_code(browser,screenshot, destination_path_screenshot):
     try:
         img = cv2.imread(destination_path_screenshot)
         decoded_objects = pyzbar.decode(img)
@@ -72,6 +72,7 @@ def crop_qr_code(screenshot, destination_path_screenshot):
             cv2.imwrite(qr_code_path, cropped_img)
             logging.info(f"QR code saved as {qr_code_path}")
     except Exception as e:
+        refresh(browser)
         logging.error(f"CATCH ERROR | CROP QR CODE: {e}")
 
 def check_if_page_needs_reload(browser, path):
@@ -96,7 +97,6 @@ def run_scraper():
     destination_path_screenshot = os.path.join(static_folder, screenshot)
     destination_path_qr_code = os.path.join(static_folder, qr_code)
     browser_options = Options()
-    browser_options.add_argumenoptions=("--headless")
     browser = webdriver.Firefox(options=browser_options)
     browser.get(url)
     time.sleep(3)
@@ -118,7 +118,7 @@ def run_scraper():
             
             delete_img(destination_path_qr_code)
             logging.info("Cropping QR code...")
-            crop_qr_code(destination_path_screenshot, destination_path_screenshot)
+            crop_qr_code(browser, destination_path_screenshot, destination_path_screenshot)
             logging.info("QR code cropped.")
             if check_img(destination_path_qr_code):
                 notify_server_qr_code()
