@@ -1,12 +1,13 @@
 from flask import Flask, render_template, jsonify, request, make_response
-from multiprocessing import Process
+from flask_cors import CORS
 from flask_socketio import SocketIO
+from multiprocessing import Process
 import os
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.config["UPLOAD_FOLDER"] = 'static'
-
+CORS(app, resources={r"/*": {"origins": "*"}})
 def run_scrapper():
     os.system("python3 scraper.py")
 
@@ -40,7 +41,6 @@ def qr_code_updated():
 def user_logged_in():
     scraper_process = Process(target=run_scrapper)
     scraper_process.start()
-    scraper_process.join()
     response = jsonify({'status': 'success'})
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -51,4 +51,3 @@ if __name__ == '__main__':
     scraper_process = Process(target=run_scrapper)
     scraper_process.start()
     socketio.run(app, debug=True, use_reloader=False)
-    scraper_process.join()

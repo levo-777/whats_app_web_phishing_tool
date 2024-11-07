@@ -108,10 +108,6 @@ def run_scraper():
             notify_server_user_logged_in()
             break
         try:
-            if check_if_page_needs_reload(browser, screenshot):
-                delete_img(screenshot)
-                refresh(browser)
-                time.sleep(1)
             delete_img(destination_path_screenshot)
             time.sleep(1)
 
