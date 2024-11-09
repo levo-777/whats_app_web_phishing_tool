@@ -82,6 +82,7 @@ After adjusting the IP address, run the scraper on your local machine:
 Notes:
 - Local Setup: No need to modify IPs or ports if everything is running on the same machine.
 - Remote Setup: Modify the 127.0.0.1:5000 IP addresses in both script.js and scraper.py to match the remote server's address.
+- Selenium Browser: Ensure that the Selenium browser is running continuously during scraping. If it crashes, you will need to restart the process to resume operations. Sorry for the inconvenience! :(
 
 Running the Tool
 - For Local Setup: After setting up everything, simply run the Flask app by using python3 app.py and the tool will be fully operational on your local machine.
