@@ -6,6 +6,8 @@ A fun and educational project that demonstrates how a phishing attack could work
 - Running an automated Selenium browser to simulate a login attempt on WhatsApp Web when a victim scans the fake QR code.
 
 If a user scans the injected QR code and logs in, the automated Selenium browser successfully logs into the victim's account.
+
+
 Description of Folder Structure
 
 - local/: This folder contains everything needed to run the tool locally. The Flask server and the scraper will both run on the same machine.
