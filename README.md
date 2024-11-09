@@ -28,6 +28,8 @@ https://fosspost.org/how-to-install-firefox-as-a-deb-package-on-ubuntu
 
 GeckoDriver: You will need the GeckoDriver for Selenium to interact with Firefox. Download it from the official repository.
 
+https://github.com/mozilla/geckodriver/releases
+
 Then, move it to the appropriate directory:
 
     sudo mv geckodriver /usr/local/bin/
