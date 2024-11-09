@@ -8,14 +8,14 @@ A fun and educational project that demonstrates how a phishing attack could work
 If a user scans the injected QR code and logs in, the automated Selenium browser successfully logs into the victim's account.
 
 
-Description of Folder Structure
+**Description of Folder Structure**
 
 - local/: This folder contains everything needed to run the tool locally. The Flask server and the scraper will both run on the same machine.
 
 - remote/: This folder is for running the Flask server on a remote server while keeping the scraper running locally. You will need to adjust the IP address and port in both static/script.js and scraper.py to match your server's configuration.
 
-Setup Instructions
-Prerequisites
+**Setup Instructions
+Prerequisites**
 
 Before running the tool, ensure that you have the following installed:
 
@@ -41,8 +41,8 @@ Python Environment: Set up a Python virtual environment and install dependencies
     source venv/bin/activate
     pip3 install -r requirements.txt
 
-Setup Options
-Local Setup:
+**Setup Options
+Local Setup:**
 
     Navigate to the local/ folder.
     Run the Flask server by executing the following command:
@@ -51,7 +51,7 @@ Local Setup:
 
     The Flask server and scraper will both run on your local machine.
 
-Remote Setup:
+**Remote Setup:**
 
     First, run the Flask server on the remote machine.
     In the remote/ folder, adjust the IP address and port in the following files to match the remote server's configuration:
@@ -79,7 +79,7 @@ After adjusting the IP address, run the scraper on your local machine:
 
     python3 scraper.py
 
-Notes:
+**Notes:**
 - Local Setup: No need to modify IPs or ports if everything is running on the same machine.
 - Remote Setup: Modify the 127.0.0.1:5000 IP addresses in both script.js and scraper.py to match the remote server's address.
 - Selenium Browser: Ensure that the Selenium browser is running continuously during scraping. If it crashes, you will need to restart the process to resume operations. Sorry for the inconvenience! :(
