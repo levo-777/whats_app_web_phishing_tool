@@ -13,7 +13,7 @@ from sqlalchemy import create_engine
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def notify_server_qr_code(url):
+def notify_server_qr_code():
     url = "http://localhost:5000/qr_code_updated"
     try:
         response = requests.post(url)
@@ -22,7 +22,7 @@ def notify_server_qr_code(url):
     except Exception as e:
         logging.error("Error notifying Flask app: {e}")
 
-def notify_server_user_logged_in(url):
+def notify_server_user_logged_in():
     url = "http://localhost:5000/user_logged_in"
     try:
         response = requests.post(url)

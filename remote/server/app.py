@@ -44,13 +44,21 @@ def qr_code_updated():
 def upload_img():
     if 'file' in request.files:
         qr_code_img = request.files['file']
-        qr_code_img = qr_code_img.filename
-        qr_code_img_path = os.path.join('./static', qr_code_img)
+        filename = qr_code_img.filename  
+        qr_code_img_path = os.path.join('./static', filename)
         if os.path.exists('./static/qr_code.png'):
             os.remove('./static/qr_code.png')
         qr_code_img.save(qr_code_img_path)
+        response = make_response("OK")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
         socketio.emit('new-qr-code', {'data': 'new-qr-code'})
-        return "OK"
+        
+        return response
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, use_reloader=False)
