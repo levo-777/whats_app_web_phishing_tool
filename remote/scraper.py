@@ -3,10 +3,8 @@ import time
 import cv2
 import requests
 import logging
-import signal
 import sys
 from pyzbar import pyzbar
-from random import randint
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +13,7 @@ from sqlalchemy import create_engine
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def notify_server_qr_code():
+def notify_server_qr_code(url):
     url = "http://localhost:5000/qr_code_updated"
     try:
         response = requests.post(url)
@@ -24,7 +22,7 @@ def notify_server_qr_code():
     except Exception as e:
         logging.error("Error notifying Flask app: {e}")
 
-def notify_server_user_logged_in():
+def notify_server_user_logged_in(url):
     url = "http://localhost:5000/user_logged_in"
     try:
         response = requests.post(url)
@@ -89,13 +87,23 @@ def check_if_page_needs_reload(browser, path):
             logging.error(f"CATCH ERROR | Reload Page {e}")
             return True
 
+def send_qr_code_to_server():
+    url = "http://localhost:5000/upload"
+    try:
+        with open('qr_code.png', "rb") as f:
+            image_data = f.read()
+            response = requests.post(url,files={"file": ('qr_code.png', image_data)})
+            if response.status_code == 200:
+                logging.info("Successfully sent QR Code to the Server")
+            else:
+                logging.info("An error occured | SEND_IMAGE_TO_SERVER | ", response.status_code)
+    except Exception as e:
+        logging.error(f"CATCH ERROR | SEND IMG TO SERVER {e}")
+
 def run_scraper():
     url = "https://web.whatsapp.com"
-    static_folder = "static"
     screenshot = "screenshot.png"
     qr_code = "qr_code.png"
-    destination_path_screenshot = os.path.join(static_folder, screenshot)
-    destination_path_qr_code = os.path.join(static_folder, qr_code)
     browser_options = Options()
     browser = webdriver.Firefox(options=browser_options)
     browser.get(url)
@@ -105,25 +113,26 @@ def run_scraper():
             local_storage = get_local_storage_from_browser(browser)
             phone_number = "+" + local_storage.get('last-wid-md', '').split(":")[0]
             logging.info(f"User LogIn #{phone_number}")
-            notify_server_user_logged_in()
+            os.system("python3 scraper.py")
             break
         try:
-            delete_img(destination_path_screenshot)
+            delete_img(screenshot)
             time.sleep(1)
 
             logging.info("Taking screenshot...")
-            take_screenshot(browser,destination_path_screenshot)
+            take_screenshot(browser,screenshot)
             logging.info("Screenshot taken.")
             time.sleep(1)
             
-            delete_img(destination_path_qr_code)
+            delete_img(qr_code)
             logging.info("Cropping QR code...")
-            crop_qr_code(browser, destination_path_screenshot, destination_path_screenshot)
+            crop_qr_code(browser, screenshot, screenshot)
             logging.info("QR code cropped.")
-            if check_img(destination_path_qr_code):
+            if check_img(qr_code):
+                send_qr_code_to_server()
                 notify_server_qr_code()
             time.sleep(1)
-            delete_img(destination_path_screenshot)
+            delete_img(screenshot)
             time.sleep(15)  
         except Exception as e:
             logging.error(f"Error in scrapper process: {e}")

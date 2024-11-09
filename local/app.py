@@ -22,6 +22,9 @@ def track_visitor():
 
 @app.route('/')
 def index():
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     response = make_response(render_template('index.html'))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -31,6 +34,9 @@ def index():
 @app.route('/qr_code_updated', methods=['POST'])
 def qr_code_updated():
     socketio.emit('new-qr-code', {'data': 'new-qr-code'})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     response = jsonify({'status': 'success'})
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -41,6 +47,9 @@ def qr_code_updated():
 def user_logged_in():
     scraper_process = Process(target=run_scrapper)
     scraper_process.start()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     response = jsonify({'status': 'success'})
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
