@@ -32,6 +32,7 @@ https://github.com/mozilla/geckodriver/releases
 
 Then, move it to the appropriate directory:
 
+    tar -xvzf geckodriver-v0.32.0-linux64.tar.gz
     sudo mv geckodriver /usr/local/bin/
     sudo chmod +x /usr/local/bin/geckodriver
 
@@ -54,6 +55,8 @@ Local Setup:**
 **Remote Setup:**
 
     First, run the Flask server on the remote machine.
+    python3 app.py
+    
     In the remote/ folder, adjust the IP address and port in the following files to match the remote server's configuration:
         static/script.js:
 
@@ -63,17 +66,17 @@ Local Setup:**
       imageElement.setAttribute("src", url);
     });
 
-scraper.py:
+adjust on your local machine scraper.py:
 
     def notify_server_qr_code():
-        url = "http://localhost:5000/qr_code_updated"
+        url = "http://ip_address_of_remote_flask_server_running_on_vps:5000/qr_code_updated"
         response = requests.post(url)
 
     def notify_server_user_logged_in():
-      url = "http://localhost:5000/user_logged_in"
+      url = "http://ip_address_of_remote_flask_server_running_on_vps:5000/user_logged_in"
       
     def send_qr_code_to_server():
-      url = "http://localhost:5000/upload"
+      url = "http://ip_address_of_remote_flask_server_running_on_vps:5000/upload"
 
 After adjusting the IP address, run the scraper on your local machine:
 
