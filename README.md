@@ -7,6 +7,11 @@ A fun and educational project that demonstrates how a phishing attack could work
 
 If a user scans the injected QR code and logs in, the automated Selenium browser successfully logs into the victim's account.
 
+**Tech Stack:**
+- Ubuntu (Operating System)
+- Python3 (Programming Language)
+- Firefox Selenium Browser (Web Automation)
+- Flask (Web Framework)
 
 **Description of Folder Structure**
 
