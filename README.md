@@ -50,6 +50,8 @@ Python Environment: Set up a Python virtual environment and install dependencies
 **Setup Options
 Local Setup:**
 
+Run everything locally on your machine (it will be limited to your home network and may face issues with tunneling services like ngrok or router port forwarding.
+
     Navigate to the local/ folder.
     Run the Flask server by executing the following command:
 
@@ -58,6 +60,8 @@ Local Setup:**
     The Flask server and scraper will both run on your local machine.
 
 **Remote Setup:**
+
+After installing the requirements, run the server on a VPS for a public IP address adjust the scraper to use the VPS's public IP and run the scraper locally.
 
     First, run the Flask server on the remote machine.
     python3 app.py
