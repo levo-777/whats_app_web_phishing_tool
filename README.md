@@ -1,4 +1,4 @@
-**WhatsApp Web Phishing Tool**
+**WhatsApp Web Phishing Tool (NEEDS REWORKING & UPDATING , SOON ....)**
 
 A fun and educational project that demonstrates how a phishing attack could work by leveraging WhatsApp Web's QR code authentication. This tool works by:
 - Extracting the QR code from the official WhatsApp Web login page.
